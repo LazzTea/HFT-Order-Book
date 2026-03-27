@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
+cmake_policy(SET CMP0135 NEW)
 project(HFT_Order_Book CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -15,14 +16,36 @@ endif()
 
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
-include_directories(include)
+# For Google Testing
+include(FetchContent)
 
-add_executable(run_tests tests/test_main.cpp)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/heads/main.zip
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+
+FetchContent_MakeAvailable(googletest)
+include(GoogleTest)
+
+add_executable(run_tests
+        tests/test_EventLog.cpp
+        tests/test_OrderEvent.cpp
+        tests/test_OrderManager.cpp
+        tests/test_PositionTracker.cpp
+        tests/test_RiskChecker.cpp)
+
 target_include_directories(run_tests PRIVATE include)
 
-add_executable(run_simulation tests/test_simulation.cpp
-        OrderManager.h)
-target_include_directories(run_simulation PRIVATE include)
+target_link_libraries(run_tests
+        GTest::gtest
+        GTest::gtest_main
+        pthread
+)
+
+enable_testing()
+
+gtest_discover_tests(run_tests)
 
 
 # Benchmark target (add later)
