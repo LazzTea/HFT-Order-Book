@@ -40,7 +40,8 @@ add_executable(run_tests
         tests/test_OrderEvent.cpp
         tests/test_OrderManager.cpp
         tests/test_PositionTracker.cpp
-        tests/test_RiskChecker.cpp)
+        tests/test_RiskChecker.cpp
+)
 
 target_include_directories(run_tests PRIVATE include)
 
@@ -52,7 +53,14 @@ target_link_libraries(run_tests
 enable_testing()
 
 include(GoogleTest)
-gtest_discover_tests(run_tests)
+
+set_target_properties(run_tests PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
+
+gtest_discover_tests(run_tests
+        DISCOVERY_MODE PRE_TEST
+)
 
 
 # Benchmark target (add later)
