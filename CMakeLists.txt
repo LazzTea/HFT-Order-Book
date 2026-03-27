@@ -14,7 +14,11 @@ else()
     add_link_options(-fsanitize=address,undefined)
 endif()
 
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+if (MSVC)
+    add_compile_options(/W4 /WX)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+endif()
 
 # For Google Testing
 include(FetchContent)
