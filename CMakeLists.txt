@@ -7,14 +7,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Release build: max optimisation, no debug symbols
 # Debug build:   sanitizers, assertions
+
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_compile_options(-O3 -march=native -funroll-loops -DNDEBUG)
+    add_compile_options(-O3 -DNDEBUG)
 else()
-    add_compile_options(-O0 -g -fsanitize=address,undefined)
-    add_link_options(-fsanitize=address,undefined)
+    if(NOT MSVC)
+        add_compile_options(-O0 -g -fsanitize=address,undefined)
+        add_link_options(-fsanitize=address,undefined)
+    endif()
 endif()
 
-if (MSVC)
+if(MSVC)
     add_compile_options(/W4 /WX)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic -Werror)
@@ -44,11 +47,11 @@ target_include_directories(run_tests PRIVATE include)
 target_link_libraries(run_tests
         GTest::gtest
         GTest::gtest_main
-        pthread
 )
 
 enable_testing()
 
+include(GoogleTest)
 gtest_discover_tests(run_tests)
 
 
