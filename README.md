@@ -1,7 +1,7 @@
 
 OrderEvent.h -- the canonical 64-byte (exactly one cache line) event struct with fixed-point prices 
 (int64_t * PRICE_SCALE), typed enums for EventType and Side, and factory helpers make_fill() / make_new_order(). This 
-struct is written directly to disk — no virtual methods, no heap.
+struct is written directly to disk -- no virtual methods, no heap.
 
 EventLog.h -- memory-mapped append-only log. 
 Opens or creates a file, writes events into mmap'd pages, keeps a durable sequence counter in the file header so you 
