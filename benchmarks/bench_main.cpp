@@ -14,11 +14,11 @@
 // Build:
 //   g++ -std=c++17 -O3 -march=native -Iinclude bench/bench_main.cpp -o run_bench
 
-#include "../OrderEvent.h"
-#include "../EventLog.h"
-#include "../PositionTracker.h"
-#include "../OrderManager.h"
-#include "../RiskChecker.h"
+#include "../include/OrderEvent.h"
+#include "../include/EventLog.h"
+#include "../include/PositionTracker.h"
+#include "../include/OrderManager.h"
+#include "../include/RiskChecker.h"
 #include "bench_harness.h"
 
 #include <cstring>
@@ -28,7 +28,7 @@ using namespace hft;
 
 //      Event Log
 
-BENCH_CASE("EventLog", "append() — mmap write", 100'000) {
+BENCH_CASE("EventLog", "append() - mmap write", 100'000) {
     const auto path = "/tmp/hft_bench_log.bin";
     unlink(path);
     EventLog log(path);
@@ -46,7 +46,7 @@ BENCH_CASE("EventLog", "append() — mmap write", 100'000) {
 
 //      Position Tracker
 
-BENCH_CASE("PositionTracker", "apply_event() buy — warm cache", 100'000) {
+BENCH_CASE("PositionTracker", "apply_event() buy - warm cache", 100'000) {
     PositionTracker tracker;
     tracker.apply_event(make_fill("AAPL", Side::Buy, 1, fp(175.00), "W"));
     const auto evt = make_fill("AAPL", Side::Buy, 100, fp(175.00), "O");
@@ -80,7 +80,7 @@ BENCH_CASE("PositionTracker", "mark_to_market() single symbol", 100'000) {
     }
 }
 
-BENCH_CASE("PositionTracker", "get() — symbol lookup hit", 100'000) {
+BENCH_CASE("PositionTracker", "get() - symbol lookup hit", 100'000) {
     PositionTracker tracker;
     tracker.apply_event(make_fill("AAPL", Side::Buy, 100, fp(175.00), "W"));
     RUN {
@@ -103,7 +103,7 @@ BENCH_CASE("OrderManager", "apply_event() NewOrder", 100'000) {
     }
 }
 
-BENCH_CASE("OrderManager", "apply_event() FullFill — existing order", 100'000) {
+BENCH_CASE("OrderManager", "apply_event() FullFill - existing order", 100'000) {
     // Tests the fill path on a known order — no get_or_create, just find + update.
     OrderManager orders;
     orders.apply_event(make_new_order("AAPL", Side::Buy, 100, fp(175.00), "O1"));
@@ -116,7 +116,7 @@ BENCH_CASE("OrderManager", "apply_event() FullFill — existing order", 100'000)
     }
 }
 
-BENCH_CASE("OrderManager", "apply_event() PartialFill — avg price update", 100'000) {
+BENCH_CASE("OrderManager", "apply_event() PartialFill - avg price update", 100'000) {
     // Weighted average fill price recalculation on every partial.
     OrderManager orders;
     orders.apply_event(make_new_order("AAPL", Side::Buy, 10'000, fp(175.00), "O1"));
@@ -143,7 +143,7 @@ BENCH_CASE("OrderManager", "apply_event() Cancel", 100'000) {
     }
 }
 
-BENCH_CASE("OrderManager", "open_exposure() — 10 open orders", 100'000) {
+BENCH_CASE("OrderManager", "open_exposure() - 10 open orders", 100'000) {
     // open_exposure() scans all slots linearly — cost grows with open order count.
     // 10 open orders is realistic for a single-symbol strategy.
     OrderManager orders;
@@ -157,7 +157,7 @@ BENCH_CASE("OrderManager", "open_exposure() — 10 open orders", 100'000) {
     }
 }
 
-BENCH_CASE("OrderManager", "open_exposure() — 50 open orders", 100'000) {
+BENCH_CASE("OrderManager", "open_exposure() - 50 open orders", 100'000) {
     // Same as above but with 50 open orders — shows linear scan cost.
     OrderManager orders;
     for (int i = 0; i < 50; ++i) {
@@ -172,7 +172,7 @@ BENCH_CASE("OrderManager", "open_exposure() — 50 open orders", 100'000) {
 
 //      Risk Checker
 
-BENCH_CASE("RiskChecker", "check() pass — position-only (legacy)", 100'000) {
+BENCH_CASE("RiskChecker", "check() pass - position-only (legacy)", 100'000) {
     RiskChecker risk;
     PositionTracker tracker;
     tracker.apply_event(make_fill("AAPL", Side::Buy, 20'000, fp(175.00), "F1"));
@@ -181,7 +181,7 @@ BENCH_CASE("RiskChecker", "check() pass — position-only (legacy)", 100'000) {
     }
 }
 
-BENCH_CASE("RiskChecker", "check() pass — full (tracker + orders)", 100'000) {
+BENCH_CASE("RiskChecker", "check() pass - full (tracker + orders)", 100'000) {
     RiskChecker risk;
     PositionTracker tracker;
     OrderManager orders;
@@ -192,7 +192,7 @@ BENCH_CASE("RiskChecker", "check() pass — full (tracker + orders)", 100'000) {
     }
 }
 
-BENCH_CASE("RiskChecker", "check() FailPositionLimit — full", 100'000) {
+BENCH_CASE("RiskChecker", "check() FailPositionLimit - full", 100'000) {
     RiskChecker risk;
     PositionTracker tracker;
     OrderManager orders;
@@ -204,7 +204,7 @@ BENCH_CASE("RiskChecker", "check() FailPositionLimit — full", 100'000) {
     }
 }
 
-BENCH_CASE("RiskChecker", "check() FailMaxQty — early exit", 100'000) {
+BENCH_CASE("RiskChecker", "check() FailMaxQty - early exit", 100'000) {
     RiskChecker risk;
     PositionTracker tracker;
     OrderManager orders;

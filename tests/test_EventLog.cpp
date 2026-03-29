@@ -1,7 +1,7 @@
-#include "../OrderEvent.h"
-#include "../EventLog.h"
-#include "../PositionTracker.h"
-#include "../OrderManager.h"
+#include "../include/OrderEvent.h"
+#include "../include/EventLog.h"
+#include "../include/PositionTracker.h"
+#include "../include/OrderManager.h"
 
 #include <gtest/gtest.h>
 #include <cassert>

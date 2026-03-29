@@ -1,3 +1,7 @@
 # Idea Folder
 .idea
 
+# FIX Gateway
+fix_store/
+fix_logs/
+*.bin
