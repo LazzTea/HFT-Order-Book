@@ -1,0 +1,3 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /tmp/HFT_Order_Book -B /tmp/HFT_Order_Book/cmake-build-debug-hft-docker-1
+CMake Error: The source directory "/tmp/HFT_Order_Book" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
