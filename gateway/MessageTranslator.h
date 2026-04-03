@@ -45,7 +45,7 @@ public:
             case FIX::ExecType_FILL:         etype = EventType::FullFill;    break;
             case FIX::ExecType_CANCELED:     etype = EventType::Cancel;      break;
             case FIX::ExecType_REJECTED:     etype = EventType::Reject;      break;
-            case FIX::ExecType_NEW:          return std::nullopt; // ack only
+            case FIX::ExecType_NEW:          return std::nullopt;
             default:                         return std::nullopt;
         }
 
