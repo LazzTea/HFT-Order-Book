@@ -1,3 +1,5 @@
+Github Actions currently bugged with new FIX Gateway, local testing with docker,
+works fine.
 
 OrderEvent.h -- the canonical 64-byte (exactly one cache line) event struct with fixed-point prices 
 (int64_t * PRICE_SCALE), typed enums for EventType and Side, and factory helpers make_fill() / make_new_order(). This 
