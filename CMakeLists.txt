@@ -23,21 +23,27 @@ include(GoogleTest)
 
 # Both library and headers pinned to /usr/local — the from-source build location.
 # This avoids the apt vs source mismatch that causes ABI link errors.
-find_library(QUICKFIX_LIBRARY REQUIRED
-        NAMES quickfix
-        PATHS /usr/local/lib
-        NO_DEFAULT_PATH
-)
-find_path(QUICKFIX_INCLUDE_DIR REQUIRED
-        NAMES quickfix/Application.h
-        PATHS /usr/local/include
-        NO_DEFAULT_PATH
-)
-add_library(quickfix UNKNOWN IMPORTED)
-set_target_properties(quickfix PROPERTIES
-        IMPORTED_LOCATION             "${QUICKFIX_LIBRARY}"
-        INTERFACE_INCLUDE_DIRECTORIES "${QUICKFIX_INCLUDE_DIR}"
-)
+option(ENABLE_QUICKFIX "Enable QuickFIX gateway components" ON)
+
+if(ENABLE_QUICKFIX)
+    # Both library and headers pinned to /usr/local — the from-source build location.
+    # This avoids the apt vs source mismatch that causes ABI link errors.
+    find_library(QUICKFIX_LIBRARY REQUIRED
+            NAMES quickfix
+            PATHS /usr/local/lib
+            NO_DEFAULT_PATH
+    )
+    find_path(QUICKFIX_INCLUDE_DIR REQUIRED
+            NAMES quickfix/Application.h
+            PATHS /usr/local/include
+            NO_DEFAULT_PATH
+    )
+    add_library(quickfix UNKNOWN IMPORTED)
+    set_target_properties(quickfix PROPERTIES
+            IMPORTED_LOCATION             "${QUICKFIX_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${QUICKFIX_INCLUDE_DIR}"
+    )
+endif()
 
 # ── Tests: bookkeeping layer (no QuickFIX dependency) ────────────────────────
 
@@ -64,39 +70,41 @@ endforeach()
 
 # ── Tests: gateway layer ──────────────────────────────────────────────────────
 
-set(GATEWAY_TESTS
-        tests/test_MessageTranslator.cpp
-        tests/test_FIXGateway.cpp
-        tests/test_Killswitch.cpp
-)
+if(ENABLE_QUICKFIX)
+    set(GATEWAY_TESTS
+            tests/test_MessageTranslator.cpp
+            tests/test_FIXGateway.cpp
+            tests/test_Killswitch.cpp
+    )
 
-foreach(src ${GATEWAY_TESTS})
-    get_filename_component(target ${src} NAME_WE)
-    add_executable(${target} ${src} gateway/FIXGateway.cpp)
-    target_include_directories(${target} PRIVATE
-            include gateway tests/fixtures)
-    target_link_libraries(${target} PRIVATE
-            GTest::gtest GTest::gtest_main quickfix)
+    foreach(src ${GATEWAY_TESTS})
+        get_filename_component(target ${src} NAME_WE)
+        add_executable(${target} ${src} gateway/FIXGateway.cpp)
+        target_include_directories(${target} PRIVATE
+                include gateway tests/fixtures)
+        target_link_libraries(${target} PRIVATE
+                GTest::gtest GTest::gtest_main quickfix)
+        # C++14 required: QuickFIX headers use throw() specs removed in C++17
+        # set_target_properties(${target} PROPERTIES CXX_STANDARD 14)
+        target_compile_options(${target} PRIVATE
+                -O0 -g -fsanitize=address,undefined)
+        target_link_options(${target} PRIVATE
+                -fsanitize=address,undefined)
+        gtest_discover_tests(${target})
+    endforeach()
+
+    # ── Gateway executable ────────────────────────────────────────────────────────
+
+    add_executable(run_gateway
+            src/main.cpp
+            gateway/FIXGateway.cpp
+    )
+    target_include_directories(run_gateway PRIVATE include gateway)
+    target_link_libraries(run_gateway PRIVATE quickfix)
     # C++14 required: QuickFIX headers use throw() specs removed in C++17
-    # set_target_properties(${target} PROPERTIES CXX_STANDARD 14)
-    target_compile_options(${target} PRIVATE
-            -O0 -g -fsanitize=address,undefined)
-    target_link_options(${target} PRIVATE
-            -fsanitize=address,undefined)
-    gtest_discover_tests(${target})
-endforeach()
-
-# ── Gateway executable ────────────────────────────────────────────────────────
-
-add_executable(run_gateway
-        src/main.cpp
-        gateway/FIXGateway.cpp
-)
-target_include_directories(run_gateway PRIVATE include gateway)
-target_link_libraries(run_gateway PRIVATE quickfix)
-# C++14 required: QuickFIX headers use throw() specs removed in C++17
-# set_target_properties(run_gateway PROPERTIES CXX_STANDARD 14)
-target_compile_options(run_gateway PRIVATE -O2 -g)
+    # set_target_properties(run_gateway PROPERTIES CXX_STANDARD 14)
+    target_compile_options(run_gateway PRIVATE -O2 -g)
+endif()
 
 # ── Benchmark ─────────────────────────────────────────────────────────────────
 

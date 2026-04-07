@@ -21,7 +21,7 @@ jobs:
           sudo apt-get install -y cmake ninja-build libgtest-dev
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja -DENABLE_QUICKFIX=OFF
 
       - name: Build bookkeeping tests
         run: |
@@ -99,6 +99,6 @@ jobs:
 
       - name: Build and smoke-run benchmark
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja -DENABLE_QUICKFIX=OFF
           cmake --build build --target run_bench
           ./build/run_bench 2>&1 | grep -E "TSC|passed|FAILED|ns"
