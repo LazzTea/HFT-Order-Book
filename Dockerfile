@@ -30,5 +30,11 @@ RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/
 RUN useradd -m user && echo 'user:password' | chpasswd
 RUN usermod -aG sudo user
 
+# Set working directory
+WORKDIR /workspace
+
+# Copy source code
+COPY . /workspace/
+
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
